@@ -1,0 +1,61 @@
+---
+title: "ST558-Project 2"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = FALSE, warning = FALSE)
+library(tidyverse)
+```
+
+# Introduction
+
+TBD: Mark
+
+# Data
+
+```{r}
+# Import News
+news <- read_csv("OnlineNewsPopularity/OnlineNewsPopularity.csv")
+
+# Split by channel
+news <- news %>%
+  pivot_longer(starts_with("data_channel_is_"), 
+               names_prefix = "data_channel_is_",
+               names_to = "channel") %>%
+  filter(value == 1) %>%
+  select(-value) %>%
+  split(.$channel) 
+```
+
+# Summarizations
+
+Each group member is responsible for producing some summary statistics (means, sds, contingency tables, etc.) and for producing at least three graphs (each) of the data.
+
+# Modeling
+
+The first group member should fit a random forest model and the second group member should
+fit a boosted tree model. Both models should be chosen using cross-validation.
+
+Prior to the models fit using linear regression, the first group member should provide a short
+but thorough explanation of the idea of a linear regression model.
+
+Prior to each ensemble model, you should provide a short but reasonably thorough explanation
+of the ensemble model you are using (so one for each group member).
+
+## Random Forest
+
+TBD: Jovanni
+
+## Boosted Tree
+
+TBD: Mark
+
+# Comparison
+
+This can be done by one group member and the automation done by the other (see below).
+
+# Automation
+
+This should be done by the group member that doesn’t automate the comparison of models
+part.
