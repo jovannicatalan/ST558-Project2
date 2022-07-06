@@ -27,9 +27,77 @@ news <- news %>%
   select(-value) %>%
   split(.$channel) 
 ```
+Let's create the file names and params for the render code
+```{r echo = FALSE, eval=FALSE}
+## Create file names
+data_channels <- names(news)
+output_file <- paste0(data_channels, ".html")
 
+## Create list for each data channel with just the channel name param.
+params <- lapply(data_channels, FUN = function(x){list(data_channel = x)})
+
+## Put into df
+reports <- tibble(output_file, params)
+```
+```{r echo=FALSE, eval=FALSE}
+## Render code
+library(rmarkdown)
+apply(reports, MARGIN = 1,
+      FUN = function(X){
+        render(input = "ST558-Project2.Rmd",
+               output_file = x[[1]],
+               params = x[[2]])
+      })
+```
+Let's return the dataset based on the specified data channel param for each report
+```{r}
+data_channel <- params$data_channel
+news <- news$data_channel
+```
 # Summarizations
+```{r}
+##
+##correlations <- t(cor(news$shares, news[, 2:60]))
+ggplot(data = news, aes(shares, LDA_02)) +
+  geom_point(aes(color = as.factor(data_channel_is_world))) +
+  xlim(0, 15000) 
 
+ggplot(data = news, aes(shares, avg_negative_polarity)) +
+  geom_point(aes(color = as.factor(data_channel_is_world))) +
+  xlim(0, 15000) 
+
+ggplot(data = news, aes(shares, average_token_length)) +
+  geom_point(aes(color = as.factor(data_channel_is_world))) +
+  xlim(0, 15000) 
+
+ggplot(data = news, aes(shares, max_negative_polarity)) +
+  geom_point(aes(color = as.factor(data_channel_is_world))) +
+  xlim(0, 15000) 
+
+ggplot(data = news, aes(shares, kw_max_avg)) +
+  geom_point(aes(color = as.factor(data_channel_is_world))) +
+  xlim(0, 15000)
+
+ggplot(data = news, aes(shares, LDA_03)) +
+  geom_point(aes(color = as.factor(data_channel_is_world))) +
+  xlim(0, 15000)
+
+
+ggplot(data = news, aes(shares, kw_avg_avg)) +
+  geom_point(aes(color = as.factor(data_channel_is_world))) +
+  xlim(0, 15000) 
+```
+Get days of week in a single column and plot visuals based on weekday for shares
+```{r}
+newsDaysSub <- news %>% select(shares, weekday_is_monday, weekday_is_tuesday, weekday_is_wednesday, weekday_is_thursday, weekday_is_friday, weekday_is_saturday, weekday_is_sunday)
+
+newsDaysSubLong <- pivot_longer(data = newsDaysSub, cols = c(weekday_is_monday, weekday_is_tuesday, weekday_is_wednesday, weekday_is_thursday, weekday_is_friday, weekday_is_saturday, weekday_is_sunday), names_to = "Day")
+
+ggplot(newsDaysLong, aes(shares)) +
+  geom_boxplot(aes(fill=Day)) +
+  scale_fill_discrete(labels = c("Friday", "Monday",  "Saturday","Sunday", "Thursday","Tuesday", "Wednesday")) +
+  xlim(0, 15000)
+```
 Each group member is responsible for producing some summary statistics (means, sds, contingency tables, etc.) and for producing at least three graphs (each) of the data.
 
 # Modeling
