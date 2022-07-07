@@ -17,6 +17,7 @@ TBD: Mark
 
 ```{r}
 library(tidyverse)
+set.seed(3)
 
 # Import News
 news <- read_csv("OnlineNewsPopularity/OnlineNewsPopularity.csv")
@@ -87,7 +88,7 @@ ggplot(newsDaysSubLong, aes(shares)) +
   geom_boxplot(aes(fill=Day)) +
   scale_fill_discrete(labels = c("Friday", "Monday",  "Saturday","Sunday", "Thursday","Tuesday", "Wednesday")) +
   theme(axis.ticks.y = element_blank(),
-        axis.text.x = element_blank()) +
+        axis.text.y = element_blank()) +
   xlim(0, 15000)
 ```
 
@@ -104,6 +105,37 @@ but thorough explanation of the idea of a linear regression model.
 
 Prior to each ensemble model, you should provide a short but reasonably thorough explanation
 of the ensemble model you are using (so one for each group member).
+## Splitting the data
+```{r}
+library(caret)
+
+## Setup new data set with only variables of interest
+newsSubFinal <- news %>% select(LDA_02, avg_negative_polarity,
+                                    average_token_length,
+                                    max_negative_polarity,
+                                    kw_max_avg, LDA_03,
+                                    kw_avg_avg,
+                                    weekday_is_monday, weekday_is_tuesday,
+                                    weekday_is_wednesday, weekday_is_thursday,
+                                    weekday_is_friday, weekday_is_saturday,
+                                    weekday_is_sunday,
+                                    shares)
+
+## Train/Test Split
+trainIndex <- createDataPartition(newsSubFinal$shares, p = .70, list = FALSE)
+newsTrain <- newsSubFinal[trainIndex, ]
+newsTest <- newsSubFinal[-trainIndex, ]
+```
+
+## Linear Regression
+```{r}
+fullLM <- train(shares ~ ., data = newsTrain,
+      method = "lm",
+      preProcess = c("center", "scale"),
+      trControl = trainControl(method = "cv", number= 5))
+pred <- predict(fullLM, select(newsTest, -shares))
+postResample(pred, newsTest$shares)
+```
 
 ## Random Forest
 
