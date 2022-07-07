@@ -137,24 +137,57 @@ of the ensemble model you are using (so one for each group member).
 
 ```{r}
 fullLM <- train(shares ~ ., data = newsTrain,
-      method = "lm",
-      preProcess = c("center", "scale"),
-      trControl = trainControl(method = "cv", number= 5))
+                method = "lm",
+                preProcess = c("center", "scale"),
+                trControl = trainControl(method = "cv", number= 5))
 pred <- predict(fullLM, select(newsTest, -shares))
-postResample(pred, newsTest$shares)
+testFullLM <- postResample(pred, newsTest$shares)
+```
+
+```{r}
+library(leaps)
+fwdFit <- train(shares ~ ., data = newsTrain,
+                method = "leapForward",
+                preProcess = c("center", "scale"),
+                trControl = trainControl(method = "cv", number= 5))
+pred <- predict(fwdFit, select(newsTest, -shares))
+testFwdFit <- postResample(pred, newsTest$shares)
 ```
 
 ## Random Forest
 
 TBD: Jovanni
+```{r}
+# Placeholder
+testRfFit <- c(RMSE = Inf, Rsquared = Inf, MAE = Inf)
+```
+
 
 ## Boosted Tree
 
-TBD: Mark
+```{r}
+gbmFit <- train(shares ~ ., data = newsTrain,
+                method = "gbm",
+                preProcess = c("center", "scale"),
+                trControl = trainControl(method = "cv", number= 5),
+                verbose = FALSE)
+pred <- predict(gbmFit, select(newsTest, -shares))
+testGbmFit <- postResample(pred, newsTest$shares)
+```
+
 
 # Comparison
 
-This can be done by one group member and the automation done by the other (see below).
+Let's compare the methods:
+```{r}
+(comp <- bind_rows(list(fullLM = testFullLM, 
+                        fwdFit = testFwdFit, 
+                        rfFit = testRfFit, 
+                        gbmFit = testGbmFit), .id = "id"))
+
+slice(comp, which.min(comp$RMSE))
+```
+
 
 # Automation
 
