@@ -35,41 +35,50 @@ news <- news[[params$data_channel]]
 ```
 
 # Summarizations
-
+Correlation Plots for Numeric variables used
 ```{r}
-##
-##correlations <- t(cor(news$shares, news[, 2:60]))
+## It seems like very few observations have shares greater than 1500
+## Fixing range for better visuals
 ggplot(data = news, aes(shares, LDA_02)) +
-  geom_point() +
+  geom_point(color="darkseagreen") +
+  labs(x = "Shares", y = "LDA Topic 2 Closeness", title = "LDA2 v. Shares") +
   xlim(0, 15000) 
 
 ggplot(data = news, aes(shares, avg_negative_polarity)) +
-  geom_point() +
+  geom_point(color="darkseagreen") +
+  labs(x = "Shares", y = "Average Polarity of Negative Words", title = "Avg. Negative Polarity v. Shares") +
   xlim(0, 15000) 
 
 ggplot(data = news, aes(shares, average_token_length)) +
-  geom_point() +
+  geom_point(color="darkorange") +
+  labs(x = "Shares", y = "Avg. Word Length in Content", title = "Avg. Word Length v. Shares") +
   xlim(0, 15000) 
 
 ggplot(data = news, aes(shares, max_negative_polarity)) +
-  geom_point() +
+  geom_point(color="darkorange") +
+  labs(x = "Shares", y = "Max. Polarity of Negative Words", title = "Max Negative Polarity v. Shares") +
   xlim(0, 15000) 
 
 ggplot(data = news, aes(shares, kw_max_avg)) +
-  geom_point() +
+  geom_point(color="aquamarine2") +
+  labs(x = "Shares", y = "Avg. Keyword/Max. Shares", title = "Avg. Keyword/Max. Shares v. Shares") +
   xlim(0, 15000)
 
 ggplot(data = news, aes(shares, LDA_03)) +
-  geom_point() +
+  geom_point(color="aquamarine2") +
+  labs(x = "Shares", y = "LDA Topic 3 Closeness", title = "LDA3 v. Shares") +
   xlim(0, 15000)
 
 
 ggplot(data = news, aes(shares, kw_avg_avg)) +
-  geom_point() +
+  geom_point(color="darkseagreen") +
+  labs(x = "Shares", y = "Avg. Keyword/Avg. Shares", title = "Avg. Keyword/Shares v. Shares") +
   xlim(0, 15000) 
 ```
-Get days of week in a single column and plot visuals based on weekday for shares
+  
+Boxplot for categorical variable used:
 ```{r}
+# Get days of week in a single column and plot visuals based on weekday for shares
 newsDaysSub <- news %>% select(shares, weekday_is_monday, weekday_is_tuesday, weekday_is_wednesday, weekday_is_thursday, weekday_is_friday, weekday_is_saturday, weekday_is_sunday)
 
 newsDaysSubLong <- pivot_longer(data = newsDaysSub, cols = c(weekday_is_monday, weekday_is_tuesday, weekday_is_wednesday, weekday_is_thursday, weekday_is_friday, weekday_is_saturday, weekday_is_sunday), names_to = "Day")
@@ -77,6 +86,8 @@ newsDaysSubLong <- pivot_longer(data = newsDaysSub, cols = c(weekday_is_monday, 
 ggplot(newsDaysSubLong, aes(shares)) +
   geom_boxplot(aes(fill=Day)) +
   scale_fill_discrete(labels = c("Friday", "Monday",  "Saturday","Sunday", "Thursday","Tuesday", "Wednesday")) +
+  theme(axis.ticks.y = element_blank(),
+        axis.text.x = element_blank()) +
   xlim(0, 15000)
 ```
 
@@ -107,10 +118,23 @@ TBD: Mark
 This can be done by one group member and the automation done by the other (see below).
 
 # Automation
-
+Below is the manual part that has to be done in order to kick off the  
+automated reports
 Let's create the file names and params for the render code.
 
 ```{r echo = FALSE, eval = FALSE}
+# Import News
+news <- read_csv("OnlineNewsPopularity/OnlineNewsPopularity.csv")
+
+# Split by channel
+news <- news %>%
+  pivot_longer(starts_with("data_channel_is_"), 
+               names_prefix = "data_channel_is_",
+               names_to = "channel") %>%
+  filter(value == 1) %>%
+  select(-value) %>%
+  split(.$channel) 
+
 ## Create file names
 data_channels <- names(news)
 output_file <- paste0(data_channels, ".html")
@@ -122,10 +146,10 @@ params <- lapply(data_channels, FUN = function(x){list(data_channel = x)})
 reports <- tibble(output_file, params)
 
 ## Render code
-library(rmarkdown)
 apply(reports, MARGIN = 1,
       FUN = function(x){
-        render(input = "ST558-Project2.Rmd",
+        rmarkdown::render(input = "ST558-Project2.Rmd",
+               output_format = "github_document",
                output_file = x[[1]],
                params = x[[2]])
       })
