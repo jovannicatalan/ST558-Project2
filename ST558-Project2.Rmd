@@ -57,8 +57,56 @@ newsTest <- newsSubFinal[-trainIndex, ]
 
 # Summarizations
 
-Correlation Plots for Numeric variables used
+```{r}
+data.frame(Means = colMeans(newsTest))
+```
+Means: We want to look at how the means of all of the variables differ across all the reports(data channels). We want to look specifically at the shares and see which data channel has the highest amount and which has the lowest.
 
+Variance: Similarly for the variance we want to see how these values differ across data channels. Which data channels have the smallest amount of variance and which have the least. 
+```{r}
+data.frame(Variance = sapply(newsTest, var))
+```
+Contigency Tables:
+Below we should analyze how the counts for each publishing day differed across data channels.
+In the Boxplots below we can see how the number of shares differed for the different  
+publishing days.
+```{r}
+#Monday
+contTabMonday <- table(Monday = newsTrain$weekday_is_monday)
+names(contTabMonday) <- c("False", "True")
+contTabMonday
+
+#Tuesday
+contTabTuesday <- table(Tuesday = newsTrain$weekday_is_tuesday)
+names(contTabTuesday) <- c("False", "True")
+contTabTuesday
+
+#Wednesday
+contTabWednesday <- table(Wednesday = newsTrain$weekday_is_wednesday)
+names(contTabWednesday) <- c("False", "True")
+contTabWednesday
+
+#Thursday
+contTabThursday <- table(Thursday = newsTrain$weekday_is_thursday)
+names(contTabThursday) <- c("False", "True")
+contTabThursday
+
+#Friday
+contTabFriday <- table(Friday = newsTrain$weekday_is_friday)
+names(contTabFriday) <- c("False", "True")
+contTabFriday
+
+#Saturday
+contTabSaturday <- table(Saturday = newsTrain$weekday_is_saturday)
+names(contTabSaturday) <- c("False", "True")
+contTabSaturday
+
+#Sunday
+contTabSunday <- table(Sunday = newsTrain$weekday_is_sunday)
+names(contTabSunday) <- c("False", "True")
+contTabSunday
+```
+Correlation Plots for Numeric variables used:
 ```{r}
 ## It seems like very few observations have shares greater than 1500
 ## Fixing range for better visuals
@@ -111,6 +159,8 @@ Boxplot for categorical variable used:
 newsTrainDaysSub <- newsTrain %>% select(shares, weekday_is_monday, weekday_is_tuesday, weekday_is_wednesday, weekday_is_thursday, weekday_is_friday, weekday_is_saturday, weekday_is_sunday)
 
 newsTrainDaysSubLong <- pivot_longer(data = newsTrainDaysSub, cols = c(weekday_is_monday, weekday_is_tuesday, weekday_is_wednesday, weekday_is_thursday, weekday_is_friday, weekday_is_saturday, weekday_is_sunday), names_to = "Day")
+## Getting observations where the publication for each day is true and not false
+newsTrainDaysSubLong <- newsTrainDaysSubLong[newsTrainDaysSubLong$value==1, ]
 
 ggplot(newsTrainDaysSubLong, aes(shares)) +
   geom_boxplot(aes(fill=Day)) +
@@ -134,7 +184,9 @@ Prior to each ensemble model, you should provide a short but reasonably thorough
 of the ensemble model you are using (so one for each group member).
 
 ## Linear Regression
-
+Linear regression is used to model the relationship between a continuous response and one or more explanatory variables. It can be used for both prediction and for inference. Linear regression models are usually fitted by minimizing the least squares residuals(although other methods exist) to estimate the betas. The term linear is in reference to the betas(parameters) not necessarily linear in the predictors. The predictors can have polynomial terms and can also be categorical.
+*  SLR = Regression with only one predictor.
+*  MLR = Regression with more than one predictor.
 ```{r}
 fullLM <- train(shares ~ ., data = newsTrain,
                 method = "lm",
@@ -149,17 +201,21 @@ library(leaps)
 fwdFit <- train(shares ~ ., data = newsTrain,
                 method = "leapForward",
                 preProcess = c("center", "scale"),
-                trControl = trainControl(method = "cv", number= 5))
+                trControl = trainControl(method = "cv", number= 5),
+                verbose = FALSE)
 pred <- predict(fwdFit, select(newsTest, -shares))
 testFwdFit <- postResample(pred, newsTest$shares)
 ```
 
 ## Random Forest
-
-TBD: Jovanni
 ```{r}
-# Placeholder
-testRfFit <- c(RMSE = Inf, Rsquared = Inf, MAE = Inf)
+rfFit <- train(shares ~ ., data = newsTrain,
+               method = "rf",
+               preProcess = c("center", "scale"),
+               trControl = trainControl(method = "cv", number = 5),
+               verbose = FALSE)
+pred <- predict(rfFit, select(newsTest, -shares))
+testRfFit <- postResample(pred, newsTest$shares)
 ```
 
 
