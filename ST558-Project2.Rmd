@@ -11,7 +11,21 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 # Introduction
 
-TBD: Mark
+The data we are working on comes from the [Online News Popularity Data Set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity)
+
+From this data set, we have decided to work on the following variables:
+
+* `shares`: The target variable, the number of shares a particular article has
+* `LDA_02`: Closeness to LDA topic 2
+* `avg_negative_polarity`: Average polarity of negative words
+* `average_token_length`: Average length of the words in the content
+* `max_negative_polarity`: Maximum polarity of negative words
+* `kw_max_avg`: Average keyword (max. shares)
+* `LDA_03`: Closeness to LDA topic 3 
+* `kw_avg_avg`: Average keyword (avg. shares), 
+* `weekday_is_...`: Which day of the week the article was written on
+
+The goal of the analysis is to predict the number of shares based on the other variables.
 
 # Data
 
