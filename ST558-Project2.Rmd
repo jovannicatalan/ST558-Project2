@@ -57,10 +57,10 @@ newsTest <- newsSubFinal[-trainIndex, ]
 
 # Summarizations
 
+Means: We want to look at how the means of all of the variables differ across all the reports(data channels). We want to look specifically at the shares and see which data channel has the highest amount and which has the lowest.
 ```{r}
 data.frame(Means = colMeans(newsTest))
 ```
-Means: We want to look at how the means of all of the variables differ across all the reports(data channels). We want to look specifically at the shares and see which data channel has the highest amount and which has the lowest.
 
 Variance: Similarly for the variance we want to see how these values differ across data channels. Which data channels have the smallest amount of variance and which have the least. 
 ```{r}
