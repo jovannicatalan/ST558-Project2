@@ -71,88 +71,89 @@ newsTest <- newsSubFinal[-trainIndex, ]
 
 # Summarizations
 
-__Means__:  
-We want to look at how the means of all of the variables differ across all the reports(data channels). We want to look specifically at the shares and see which data channel has the highest amount and which has the lowest.
+__Mean and Standard Deviation__:  
+We want to look at how the means of all of the variables differ across all the reports(data channels). We want to look specifically at the shares and see which data channel has the highest amount and which has the lowest. Similarly for the standard deviation we want to see how these values differ across data channels. Which data channels have the smallest amount of variance and which have the least. 
+
 ```{r}
-data.frame(Means = colMeans(newsTest))
+contVars <- newsTest %>%
+  select(-starts_with("weekday"))
+data.frame(Means = colMeans(contVars), StdDev = sapply(contVars, sd)) %>% 
+  format(scientific = FALSE)
 ```
 
-__Variance__:  
-Similarly for the variance we want to see how these values differ across data channels. Which data channels have the smallest amount of variance and which have the least. 
-```{r}
-data.frame(Variance = sapply(newsTest, var))
-```
-__Contigencies__:  
+__Contingencies__:  
 Below we should analyze how the counts for each publishing day differed across data channels.  
 In the Boxplots below we can see how the number of shares differed for the different  
 publishing days.
 ```{r}
-#Monday
-contTabMonday <- table(Monday = newsTrain$weekday_is_monday)
+# Convert weekday_is columns to factors
+newsDays <- newsTrain %>%
+  pivot_longer(starts_with("weekday_is_"), 
+               names_prefix = "weekday_is_",
+               names_to = "Day",
+               names_transform = list(
+                 Day = ~ readr::parse_factor(stringr::str_to_title(.x), 
+                                             levels = c("Sunday", "Monday",
+                                                        "Tuesday", "Wednesday",
+                                                        "Thursday", "Friday",
+                                                        "Saturday"))
+               )) %>%
+  filter(value == 1) %>%
+  select(-value)
 
-#Tuesday
-contTabTuesday <- table(Tuesday = newsTrain$weekday_is_tuesday)
-
-#Wednesday
-contTabWednesday <- table(Wednesday = newsTrain$weekday_is_wednesday)
-#Thursday
-contTabThursday <- table(Thursday = newsTrain$weekday_is_thursday)
-
-#Friday
-contTabFriday <- table(Friday = newsTrain$weekday_is_friday)
-
-#Saturday
-contTabSaturday <- table(Saturday = newsTrain$weekday_is_saturday)
-
-#Sunday
-contTabSunday <- table(Sunday = newsTrain$weekday_is_sunday)
-
-## Collect into dataframe
-data.frame(Monday = contTabMonday[2], Tuesday = contTabTuesday[2], Wednesday = contTabWednesday[2], Thursday = contTabThursday[2], Friday = contTabFriday[2], Saturday = contTabSaturday[2], Sunday = contTabSunday[2])
+# Display number of articles published on a given weekday
+table(newsDays$Day)
 ```
 __Correlation Plots__ for Numeric variables used:  
 Let's analyze the plots below to see if we can identify any positive or negative
 relationships between the shares and the predictor.
 ```{r}
-## It seems like very few observations have shares greater than 1500
+## It seems like very few observations have shares greater than 15000
 ## Fixing range for better visuals
 ggplot(data = newsTrain, aes(shares, LDA_02)) +
   geom_point(color="darkseagreen") +
+  geom_smooth() +
   labs(x = "Shares", y = "LDA Topic 2 Closeness", title = "LDA2 v. Shares") +
   xlim(0, 15000) 
 
 ggplot(data = newsTrain, aes(shares, avg_negative_polarity)) +
   geom_point(color="darkseagreen") +
+  geom_smooth() +
   labs(x = "Shares", y = "Average Polarity of Negative Words", 
        title = "Avg. Negative Polarity v. Shares") +
   xlim(0, 15000) 
 
 ggplot(data = newsTrain, aes(shares, average_token_length)) +
   geom_point(color="darkorange") +
+  geom_smooth() +
   labs(x = "Shares", y = "Avg. Word Length in Content", 
        title = "Avg. Word Length v. Shares") +
   xlim(0, 15000) 
 
 ggplot(data = newsTrain, aes(shares, max_negative_polarity)) +
   geom_point(color="darkorange") +
+  geom_smooth() +
   labs(x = "Shares", y = "Max. Polarity of Negative Words", 
        title = "Max Negative Polarity v. Shares") +
   xlim(0, 15000) 
 
 ggplot(data = newsTrain, aes(shares, kw_max_avg)) +
   geom_point(color="aquamarine2") +
+  geom_smooth() +
   labs(x = "Shares", y = "Avg. Keyword/Max. Shares", 
        title = "Avg. Keyword/Max. Shares v. Shares") +
   xlim(0, 15000)
 
 ggplot(data = newsTrain, aes(shares, LDA_03)) +
   geom_point(color="aquamarine2") +
+  geom_smooth() +
   labs(x = "Shares", y = "LDA Topic 3 Closeness", 
        title = "LDA3 v. Shares") +
   xlim(0, 15000)
 
 ggplot(data = newsTrain, aes(shares, kw_avg_avg)) +
   geom_point(color="darkseagreen") +
+  geom_smooth() +
   labs(x = "Shares", y = "Avg. Keyword/Avg. Shares", 
        title = "Avg. Keyword/Shares v. Shares") +
   xlim(0, 15000) 
@@ -161,38 +162,23 @@ ggplot(data = newsTrain, aes(shares, kw_avg_avg)) +
 __Boxplot__(for categorical variable used):
 
 ```{r}
-# Get days of week in a single column and plot visuals based on weekday for shares
-newsTrainDaysSub <- newsTrain %>% select(shares, weekday_is_monday, weekday_is_tuesday, weekday_is_wednesday, weekday_is_thursday, weekday_is_friday, weekday_is_saturday, weekday_is_sunday)
-
-newsTrainDaysSubLong <- pivot_longer(data = newsTrainDaysSub, cols = c(weekday_is_monday, weekday_is_tuesday, weekday_is_wednesday, weekday_is_thursday, weekday_is_friday, weekday_is_saturday, weekday_is_sunday), names_to = "Day")
-## Getting observations where the publication for each day is true and not false
-newsTrainDaysSubLong <- newsTrainDaysSubLong[newsTrainDaysSubLong$value==1, ]
-
-ggplot(newsTrainDaysSubLong, aes(shares)) +
+ggplot(newsDays, aes(shares)) + 
+  coord_flip() +
   geom_boxplot(aes(fill=Day)) +
-  scale_fill_discrete(labels = c("Friday", "Monday",  "Saturday","Sunday", "Thursday","Tuesday", "Wednesday")) +
-  theme(axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank()) +
   xlim(0, 15000)
 ```
 
-Each group member is responsible for producing some summary statistics (means, sds, contingency tables, etc.) and for producing at least three graphs (each) of the data.
 
 # Modeling
 
-The first group member should fit a random forest model and the second group member should
-fit a boosted tree model. Both models should be chosen using cross-validation.
-
-Prior to the models fit using linear regression, the first group member should provide a short
-but thorough explanation of the idea of a linear regression model.
-
-Prior to each ensemble model, you should provide a short but reasonably thorough explanation
-of the ensemble model you are using (so one for each group member).
-
 ## Linear Regression
+
 Linear regression is used to model the relationship between a continuous response and one or more explanatory variables. It can be used for both prediction and for inference. Linear regression models are usually fitted by minimizing the least squares residuals(although other methods exist) to estimate the betas. The term linear is in reference to the betas(parameters) not necessarily linear in the predictors. The predictors can have polynomial terms and can also be categorical.  
 *  SLR = Regression with only one predictor.
 *  MLR = Regression with more than one predictor.
+
 ```{r}
 fullLM <- train(shares ~ ., data = newsTrain,
                 method = "lm",
@@ -214,6 +200,9 @@ testFwdFit <- postResample(pred, newsTest$shares)
 ```
 
 ## Random Forest
+
+TBD: Random Forest Description
+
 ```{r}
 rfFit <- train(shares ~ ., data = newsTrain,
                method = "rf",
@@ -226,6 +215,8 @@ testRfFit <- postResample(pred, newsTest$shares)
 
 
 ## Boosted Tree
+
+TBD: Boosted Tree Description
 
 ```{r}
 gbmFit <- train(shares ~ ., data = newsTrain,
@@ -241,21 +232,21 @@ testGbmFit <- postResample(pred, newsTest$shares)
 # Comparison
 
 Let's compare the methods:
+
 ```{r}
 (comp <- bind_rows(list(fullLM = testFullLM, 
                         fwdFit = testFwdFit, 
                         rfFit = testRfFit, 
                         gbmFit = testGbmFit), .id = "id"))
 
-slice(comp, which.min(comp$RMSE))
+bestMethod <- slice(comp, which.min(comp$RMSE))$id
 ```
 
+The best method is __`r bestMethod`__
 
 # Automation
 
-Below is the manual part that has to be done in order to kick off the  
-automated reports
-Let's create the file names and params for the render code.
+Below is the manual part that has to be done in order to kick off the automated reports.
 
 ```{r eval = FALSE}
 ## Create file names
