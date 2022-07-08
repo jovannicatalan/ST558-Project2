@@ -57,56 +57,48 @@ newsTest <- newsSubFinal[-trainIndex, ]
 
 # Summarizations
 
-Means: We want to look at how the means of all of the variables differ across all the reports(data channels). We want to look specifically at the shares and see which data channel has the highest amount and which has the lowest.
+__Means__:  
+We want to look at how the means of all of the variables differ across all the reports(data channels). We want to look specifically at the shares and see which data channel has the highest amount and which has the lowest.
 ```{r}
 data.frame(Means = colMeans(newsTest))
 ```
 
-Variance: Similarly for the variance we want to see how these values differ across data channels. Which data channels have the smallest amount of variance and which have the least. 
+__Variance__:  
+Similarly for the variance we want to see how these values differ across data channels. Which data channels have the smallest amount of variance and which have the least. 
 ```{r}
 data.frame(Variance = sapply(newsTest, var))
 ```
-Contigency Tables:
-Below we should analyze how the counts for each publishing day differed across data channels.
+__Contigencies__:  
+Below we should analyze how the counts for each publishing day differed across data channels.  
 In the Boxplots below we can see how the number of shares differed for the different  
 publishing days.
 ```{r}
 #Monday
 contTabMonday <- table(Monday = newsTrain$weekday_is_monday)
-names(contTabMonday) <- c("False", "True")
-contTabMonday
 
 #Tuesday
 contTabTuesday <- table(Tuesday = newsTrain$weekday_is_tuesday)
-names(contTabTuesday) <- c("False", "True")
-contTabTuesday
 
 #Wednesday
 contTabWednesday <- table(Wednesday = newsTrain$weekday_is_wednesday)
-names(contTabWednesday) <- c("False", "True")
-contTabWednesday
-
 #Thursday
 contTabThursday <- table(Thursday = newsTrain$weekday_is_thursday)
-names(contTabThursday) <- c("False", "True")
-contTabThursday
 
 #Friday
 contTabFriday <- table(Friday = newsTrain$weekday_is_friday)
-names(contTabFriday) <- c("False", "True")
-contTabFriday
 
 #Saturday
 contTabSaturday <- table(Saturday = newsTrain$weekday_is_saturday)
-names(contTabSaturday) <- c("False", "True")
-contTabSaturday
 
 #Sunday
 contTabSunday <- table(Sunday = newsTrain$weekday_is_sunday)
-names(contTabSunday) <- c("False", "True")
-contTabSunday
+
+## Collect into dataframe
+data.frame(Monday = contTabMonday[2], Tuesday = contTabTuesday[2], Wednesday = contTabWednesday[2], Thursday = contTabThursday[2], Friday = contTabFriday[2], Saturday = contTabSaturday[2], Sunday = contTabSunday[2])
 ```
-Correlation Plots for Numeric variables used:
+__Correlation Plots__ for Numeric variables used:  
+Let's analyze the plots below to see if we can identify any positive or negative
+relationships between the shares and the predictor.
 ```{r}
 ## It seems like very few observations have shares greater than 1500
 ## Fixing range for better visuals
@@ -152,7 +144,7 @@ ggplot(data = newsTrain, aes(shares, kw_avg_avg)) +
   xlim(0, 15000) 
 ```
   
-Boxplot for categorical variable used:
+__Boxplot__(for categorical variable used):
 
 ```{r}
 # Get days of week in a single column and plot visuals based on weekday for shares
@@ -184,7 +176,7 @@ Prior to each ensemble model, you should provide a short but reasonably thorough
 of the ensemble model you are using (so one for each group member).
 
 ## Linear Regression
-Linear regression is used to model the relationship between a continuous response and one or more explanatory variables. It can be used for both prediction and for inference. Linear regression models are usually fitted by minimizing the least squares residuals(although other methods exist) to estimate the betas. The term linear is in reference to the betas(parameters) not necessarily linear in the predictors. The predictors can have polynomial terms and can also be categorical.
+Linear regression is used to model the relationship between a continuous response and one or more explanatory variables. It can be used for both prediction and for inference. Linear regression models are usually fitted by minimizing the least squares residuals(although other methods exist) to estimate the betas. The term linear is in reference to the betas(parameters) not necessarily linear in the predictors. The predictors can have polynomial terms and can also be categorical.  
 *  SLR = Regression with only one predictor.
 *  MLR = Regression with more than one predictor.
 ```{r}
@@ -251,7 +243,7 @@ Below is the manual part that has to be done in order to kick off the
 automated reports
 Let's create the file names and params for the render code.
 
-```{r echo = FALSE, eval = FALSE}
+```{r eval = FALSE}
 ## Create file names
 data_channels <- names(news)
 output_file <- paste0(data_channels, ".html")
