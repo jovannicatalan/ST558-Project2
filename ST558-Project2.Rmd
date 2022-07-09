@@ -73,6 +73,9 @@ newsTest <- newsSubFinal[-trainIndex, ]
 
 __Mean and Standard Deviation__:  
 We want to look at how the means of all of the variables differ across all the reports(data channels). We want to look specifically at the shares and see which data channel has the highest amount and which has the lowest. Similarly for the standard deviation we want to see how these values differ across data channels. Which data channels have the smallest amount of variance and which have the least. 
+* If the number of shares increase are increaseing as we move to the right than that specific predictor has a positive effecc on the number of shares.
+* If the number of shares are decreasing then we can say that specific predictor
+has negative effect on the number of shares.
 
 ```{r}
 contVars <- newsTest %>%
