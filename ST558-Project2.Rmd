@@ -175,9 +175,10 @@ ggplot(newsDays, aes(shares)) +
 
 ## Linear Regression
 
-Linear regression is used to model the relationship between a continuous response and one or more explanatory variables. It can be used for both prediction and for inference. Linear regression models are usually fitted by minimizing the least squares residuals(although other methods exist) to estimate the betas. The term linear is in reference to the betas(parameters) not necessarily linear in the predictors. The predictors can have polynomial terms and can also be categorical.  
-*  SLR = Regression with only one predictor.
-*  MLR = Regression with more than one predictor.
+Linear regression is used to model the relationship between a continuous response and one or more explanatory variables. It can be used for both prediction and for inference. Linear regression models are usually fitted by minimizing the least squares residuals(although other methods exist) to estimate the betas. The term linear is in reference to the betas(parameters) not necessarily linear in the predictors. The predictors can have polynomial terms and can also be categorical. 
+
+* SLR = Regression with only one predictor.
+* MLR = Regression with more than one predictor.
 
 ```{r}
 fullLM <- train(shares ~ ., data = newsTrain,
@@ -201,8 +202,7 @@ testFwdFit <- postResample(pred, newsTest$shares)
 
 ## Random Forest
 
-TBD: Random Forest Description
-
+Random Forest is  an ensemble tree based method used for prediction. Similar to other ensemble methods it averages across trees in order to obtain it's predictions. Random Forest extends the idea of bagging but does not use all predictors but instead uses a random subset for each tree fit(from bootstrap sample). The goal is to reduce correlation and reduce variance.
 ```{r}
 rfFit <- train(shares ~ ., data = newsTrain,
                method = "rf",
@@ -251,7 +251,7 @@ Below is the manual part that has to be done in order to kick off the automated 
 ```{r eval = FALSE}
 ## Create file names
 data_channels <- names(news)
-output_file <- paste0(data_channels, ".html")
+output_file <- paste0(data_channels, ".md")
 
 ## Create list for each data channel with just the channel name param.
 params <- lapply(data_channels, FUN = function(x){list(data_channel = x)})
