@@ -17,19 +17,21 @@ We will also use report automation to generate individual reports for each data 
 * gbm
 
 ## Analysis Links:
-[Business Data Channel Report](bus.html).
-[Entertainment Data Channel Report](entertainment.html).
-[lifestyle Data Channel Report](lifestyle.html).
-[Social Media Data Channel Report](socmed.html).
-[Tech Data Channel Report](tech.html).
-[World Data Channel Report](world.html)
+[Business Data Channel Report](bus.html).  
+[Entertainment Data Channel Report](entertainment.html).  
+[lifestyle Data Channel Report](lifestyle.html).   
+[Social Media Data Channel Report](socmed.html).  
+[Tech Data Channel Report](tech.html).  
+[World Data Channel Report](world.html). 
 
 ## Render Code:
-apply(reports, MARGIN = 1,
-      FUN = function(x){
-        rmarkdown::render(input = "ST558-Project2.Rmd",
-               output_format = "github_document",
-               output_file = x[[1]],
-               params = x[[2]],
-               output_options = list(html_preview= FALSE))
+<code>
+apply(reports, MARGIN = 1,  
+      FUN = function(x){ 
+        rmarkdown::render(input = "ST558-Project2.Rmd",  
+               output_format = "github_document",  
+               output_file = x[[1]],  
+               params = x[[2]],  
+               output_options = list(html_preview= FALSE)) 
       })
+</code>
