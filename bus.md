@@ -1,35 +1,30 @@
----
-title: "A report for `r params$data_channel` channel"
-output: github_document
-params:
-  data_channel: "bus"
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-```
+A report for bus channel
+================
 
 # Introduction
 
-The data we are working on comes from the [Online News Popularity Data Set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity)
+The data we are working on comes from the [Online News Popularity Data
+Set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity)
 
 From this data set, we have decided to work on the following variables:
 
-* `shares`: The target variable, the number of shares a particular article has
-* `LDA_02`: Closeness to LDA topic 2
-* `avg_negative_polarity`: Average polarity of negative words
-* `average_token_length`: Average length of the words in the content
-* `max_negative_polarity`: Maximum polarity of negative words
-* `kw_max_avg`: Average keyword (max. shares)
-* `LDA_03`: Closeness to LDA topic 3 
-* `kw_avg_avg`: Average keyword (avg. shares), 
-* `weekday_is_...`: Which day of the week the article was written on
+-   `shares`: The target variable, the number of shares a particular
+    article has
+-   `LDA_02`: Closeness to LDA topic 2
+-   `avg_negative_polarity`: Average polarity of negative words
+-   `average_token_length`: Average length of the words in the content
+-   `max_negative_polarity`: Maximum polarity of negative words
+-   `kw_max_avg`: Average keyword (max. shares)
+-   `LDA_03`: Closeness to LDA topic 3
+-   `kw_avg_avg`: Average keyword (avg. shares),
+-   `weekday_is_...`: Which day of the week the article was written on
 
-The goal of the analysis is to predict the number of shares based on the other variables.
+The goal of the analysis is to predict the number of shares based on the
+other variables.
 
 # Data
 
-```{r}
+``` r
 library(tidyverse)
 
 set.seed(3)
@@ -52,7 +47,7 @@ newsData <- news[[params$data_channel]]
 
 ## Splitting the data
 
-```{r}
+``` r
 library(caret)
 
 ## Setup new data set with only variables of interest
@@ -71,24 +66,43 @@ newsTest <- newsSubFinal[-trainIndex, ]
 
 # Summarizations
 
-__Mean and Standard Deviation__:  
-We want to look at how the means of all of the variables differ across all the reports(data channels). We want to look specifically at the shares and see which data channel has the highest amount and which has the lowest. Similarly for the standard deviation we want to see how these values differ across data channels. Which data channels have the smallest amount of variance and which have the least. 
-* If the number of shares increase are increaseing as we move to the right than that specific predictor has a positive effecc on the number of shares.
-* If the number of shares are decreasing then we can say that specific predictor
-has negative effect on the number of shares.
+**Mean and Standard Deviation**:  
+We want to look at how the means of all of the variables differ across
+all the reports(data channels). We want to look specifically at the
+shares and see which data channel has the highest amount and which has
+the lowest. Similarly for the standard deviation we want to see how
+these values differ across data channels. Which data channels have the
+smallest amount of variance and which have the least. \* If the number
+of shares increase are increaseing as we move to the right than that
+specific predictor has a positive effecc on the number of shares. \* If
+the number of shares are decreasing then we can say that specific
+predictor has negative effect on the number of shares.
 
-```{r}
+``` r
 contVars <- newsTest %>%
   select(-starts_with("weekday"))
 data.frame(Means = colMeans(contVars), StdDev = sapply(contVars, sd)) %>% 
   format(scientific = FALSE)
 ```
 
-__Contingencies__:  
-Below we should analyze how the counts for each publishing day differed across data channels.  
-In the Boxplots below we can see how the number of shares differed for the different  
+    ##                               Means         StdDev
+    ## LDA_02                   0.08284387     0.11113397
+    ## avg_negative_polarity   -0.24101552     0.10904148
+    ## average_token_length     4.68339337     0.33850468
+    ## max_negative_polarity   -0.10683927     0.07942244
+    ## kw_max_avg            5303.56815639  7898.62264368
+    ## LDA_03                   0.06657501     0.09242628
+    ## kw_avg_avg            2960.90983599  1536.39839487
+    ## shares                3022.77771855 16720.93151983
+
+**Contingencies**:  
+Below we should analyze how the counts for each publishing day differed
+across data channels.  
+In the Boxplots below we can see how the number of shares differed for
+the different  
 publishing days.
-```{r}
+
+``` r
 # Convert weekday_is columns to factors
 newsDays <- newsTrain %>%
   pivot_longer(starts_with("weekday_is_"), 
@@ -107,10 +121,16 @@ newsDays <- newsTrain %>%
 # Display number of articles published on a given weekday
 table(newsDays$Day)
 ```
-__Correlation Plots__ for Numeric variables used:  
-Let's analyze the plots below to see if we can identify any positive or negative
-relationships between the shares and the predictor.
-```{r}
+
+    ## 
+    ##    Sunday    Monday   Tuesday Wednesday  Thursday    Friday  Saturday 
+    ##       238       810       836       894       855       576       173
+
+**Correlation Plots** for Numeric variables used:  
+Let’s analyze the plots below to see if we can identify any positive or
+negative relationships between the shares and the predictor.
+
+``` r
 ## It seems like very few observations have shares greater than 15000
 ## Fixing range for better visuals
 ggplot(data = newsTrain, aes(shares, LDA_02)) +
@@ -118,42 +138,66 @@ ggplot(data = newsTrain, aes(shares, LDA_02)) +
   geom_smooth() +
   labs(x = "Shares", y = "LDA Topic 2 Closeness", title = "LDA2 v. Shares") +
   xlim(0, 15000) 
+```
 
+![](bus_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+``` r
 ggplot(data = newsTrain, aes(shares, avg_negative_polarity)) +
   geom_point(color="darkseagreen") +
   geom_smooth() +
   labs(x = "Shares", y = "Average Polarity of Negative Words", 
        title = "Avg. Negative Polarity v. Shares") +
   xlim(0, 15000) 
+```
 
+![](bus_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+
+``` r
 ggplot(data = newsTrain, aes(shares, average_token_length)) +
   geom_point(color="darkorange") +
   geom_smooth() +
   labs(x = "Shares", y = "Avg. Word Length in Content", 
        title = "Avg. Word Length v. Shares") +
   xlim(0, 15000) 
+```
 
+![](bus_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
+
+``` r
 ggplot(data = newsTrain, aes(shares, max_negative_polarity)) +
   geom_point(color="darkorange") +
   geom_smooth() +
   labs(x = "Shares", y = "Max. Polarity of Negative Words", 
        title = "Max Negative Polarity v. Shares") +
   xlim(0, 15000) 
+```
 
+![](bus_files/figure-gfm/unnamed-chunk-5-4.png)<!-- -->
+
+``` r
 ggplot(data = newsTrain, aes(shares, kw_max_avg)) +
   geom_point(color="aquamarine2") +
   geom_smooth() +
   labs(x = "Shares", y = "Avg. Keyword/Max. Shares", 
        title = "Avg. Keyword/Max. Shares v. Shares") +
   xlim(0, 15000)
+```
 
+![](bus_files/figure-gfm/unnamed-chunk-5-5.png)<!-- -->
+
+``` r
 ggplot(data = newsTrain, aes(shares, LDA_03)) +
   geom_point(color="aquamarine2") +
   geom_smooth() +
   labs(x = "Shares", y = "LDA Topic 3 Closeness", 
        title = "LDA3 v. Shares") +
   xlim(0, 15000)
+```
 
+![](bus_files/figure-gfm/unnamed-chunk-5-6.png)<!-- -->
+
+``` r
 ggplot(data = newsTrain, aes(shares, kw_avg_avg)) +
   geom_point(color="darkseagreen") +
   geom_smooth() +
@@ -161,10 +205,12 @@ ggplot(data = newsTrain, aes(shares, kw_avg_avg)) +
        title = "Avg. Keyword/Shares v. Shares") +
   xlim(0, 15000) 
 ```
-  
-__Boxplot__(for categorical variable used):
 
-```{r}
+![](bus_files/figure-gfm/unnamed-chunk-5-7.png)<!-- -->
+
+**Boxplot**(for categorical variable used):
+
+``` r
 ggplot(newsDays, aes(shares)) + 
   coord_flip() +
   geom_boxplot(aes(fill=Day)) +
@@ -173,17 +219,24 @@ ggplot(newsDays, aes(shares)) +
   xlim(0, 15000)
 ```
 
+![](bus_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 # Modeling
 
 ## Linear Regression
 
-Linear regression is used to model the relationship between a continuous response and one or more explanatory variables. It can be used for both prediction and for inference. Linear regression models are usually fitted by minimizing the least squares residuals(although other methods exist) to estimate the betas. The term linear is in reference to the betas(parameters) not necessarily linear in the predictors. The predictors can have polynomial terms and can also be categorical. 
+Linear regression is used to model the relationship between a continuous
+response and one or more explanatory variables. It can be used for both
+prediction and for inference. Linear regression models are usually
+fitted by minimizing the least squares residuals(although other methods
+exist) to estimate the betas. The term linear is in reference to the
+betas(parameters) not necessarily linear in the predictors. The
+predictors can have polynomial terms and can also be categorical.
 
-* SLR = Regression with only one predictor.
-* MLR = Regression with more than one predictor.
+-   SLR = Regression with only one predictor.
+-   MLR = Regression with more than one predictor.
 
-```{r}
+``` r
 fullLM <- train(shares ~ ., data = newsTrain,
                 method = "lm",
                 preProcess = c("center", "scale"),
@@ -192,7 +245,7 @@ pred <- predict(fullLM, select(newsTest, -shares))
 testFullLM <- postResample(pred, newsTest$shares)
 ```
 
-```{r}
+``` r
 library(leaps)
 fwdFit <- train(shares ~ ., data = newsTrain,
                 method = "leapForward",
@@ -205,8 +258,14 @@ testFwdFit <- postResample(pred, newsTest$shares)
 
 ## Random Forest
 
-Random Forest is an ensemble tree based method used for prediction. Similar to other ensemble methods it averages across trees in order to obtain it's predictions. Random Forest extends the idea of bagging but does not use all predictors but instead uses a random subset for each tree fit(from bootstrap sample). The goal is to reduce correlation and reduce variance.
-```{r}
+Random Forest is an ensemble tree based method used for prediction.
+Similar to other ensemble methods it averages across trees in order to
+obtain it’s predictions. Random Forest extends the idea of bagging but
+does not use all predictors but instead uses a random subset for each
+tree fit(from bootstrap sample). The goal is to reduce correlation and
+reduce variance.
+
+``` r
 rfFit <- train(shares ~ ., data = newsTrain,
                method = "rf",
                preProcess = c("center", "scale"),
@@ -216,12 +275,16 @@ pred <- predict(rfFit, select(newsTest, -shares))
 testRfFit <- postResample(pred, newsTest$shares)
 ```
 
-
 ## Boosted Tree
 
-Boosted tree is another ensemble that uses sequential learning in order to improve prediction.  Instead of creating trees that are independent of each other like a random forest, each tree learns from by considering the errors coming from the previous tree.  Since boosting is an iterative process, it is hard to parallelize this method and is the primary drawback fo the boosting method.
+Boosted tree is another ensemble that uses sequential learning in order
+to improve prediction. Instead of creating trees that are independent of
+each other like a random forest, each tree learns from by considering
+the errors coming from the previous tree. Since boosting is an iterative
+process, it is hard to parallelize this method and is the primary
+drawback fo the boosting method.
 
-```{r}
+``` r
 gbmFit <- train(shares ~ ., data = newsTrain,
                 method = "gbm",
                 preProcess = c("center", "scale"),
@@ -231,27 +294,37 @@ pred <- predict(gbmFit, select(newsTest, -shares))
 testGbmFit <- postResample(pred, newsTest$shares)
 ```
 
-
 # Comparison
 
-Let's compare the methods:
+Let’s compare the methods:
 
-```{r}
+``` r
 (comp <- bind_rows(list(fullLM = testFullLM, 
                         fwdFit = testFwdFit, 
                         rfFit = testRfFit, 
                         gbmFit = testGbmFit), .id = "id"))
+```
 
+    ## # A tibble: 4 x 4
+    ##   id       RMSE Rsquared   MAE
+    ##   <chr>   <dbl>    <dbl> <dbl>
+    ## 1 fullLM 16659.  0.00797 2827.
+    ## 2 fwdFit 16664.  0.00755 2809.
+    ## 3 rfFit  16707.  0.00466 2675.
+    ## 4 gbmFit 16754.  0.00535 2769.
+
+``` r
 bestMethod <- slice(comp, which.min(comp$RMSE))$id
 ```
 
-The best method is __`r bestMethod`__
+The best method is **fullLM**
 
 # Automation
 
-Below is the manual part that has to be done in order to kick off the automated reports.
+Below is the manual part that has to be done in order to kick off the
+automated reports.
 
-```{r eval = FALSE}
+``` r
 ## Create file names
 data_channels <- names(news)
 output_file <- paste0(data_channels, ".md")
