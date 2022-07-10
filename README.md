@@ -25,13 +25,41 @@ We will also use report automation to generate individual reports for each data 
 [World Data Channel Report](world.html). 
 
 ## Render Code:
-<code>
-apply(reports, MARGIN = 1,  
-      FUN = function(x){ 
-        rmarkdown::render(input = "ST558-Project2.Rmd",  
-               output_format = "github_document",  
-               output_file = x[[1]],  
-               params = x[[2]],  
-               output_options = list(html_preview= FALSE)) 
+Note: Import News and Split by Channel from below are only required if not already available in the enviroment
+```
+library(tidyverse)
+
+set.seed(3)
+
+# Import News
+news <- read_csv("OnlineNewsPopularity/OnlineNewsPopularity.csv")
+
+# Split by channel
+news <- news %>%
+  pivot_longer(starts_with("data_channel_is_"), 
+               names_prefix = "data_channel_is_",
+               names_to = "channel") %>%
+  filter(value == 1) %>%
+  select(-value) %>%
+  split(.$channel) 
+  
+## Create file names
+data_channels <- names(news)
+output_file <- paste0(data_channels, ".md")
+
+## Create list for each data channel with just the channel name param.
+params <- lapply(data_channels, FUN = function(x){list(data_channel = x)})
+
+## Put into df
+reports <- tibble(output_file, params)
+
+## Render code
+apply(reports, MARGIN = 1,
+      FUN = function(x){
+        rmarkdown::render(input = "ST558-Project2.Rmd",
+               output_format = "github_document",
+               output_file = x[[1]],
+               output_options = list(html_preview = FALSE),
+               params = x[[2]])
       })
-</code>
+```
